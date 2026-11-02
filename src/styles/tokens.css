@@ -1,0 +1,106 @@
+:root {
+  /* Brand (exact logo colors — do not change) */
+  --rio-teal: #195a64;
+  --rio-cyan: #0091c7;
+
+  /* Teal family (structure) */
+  --rio-teal-dark: #0f3b42;
+  --rio-teal-deep: #0b2d33;
+  --rio-teal-hover: #134a53;
+  --rio-teal-soft: #e3eff0;
+  --rio-teal-tint: #f0f7f7;
+  --rio-teal-line: #bcd6d9;
+  --rio-cyan-soft: #e5f4fb;
+  --rio-cyan-text: #00729d;
+
+  /* Complementary palette — evaporation ponds & desert */
+  --aqua: #22a89a;
+  --aqua-strong: #168276;
+  --aqua-soft: #e1f5f1;
+  --sand: #dd9a37;
+  --sand-strong: #9a6312;
+  --sand-soft: #fcf1df;
+  --coral: #e0705c;
+  --coral-strong: #b44a37;
+  --coral-soft: #fdebe7;
+  --indigo: #5468c6;
+  --indigo-soft: #eceffb;
+
+  /* Neutrals */
+  --bg: #eff4f5;
+  --surface: #ffffff;
+  --surface-soft: #f6f9f9;
+  --surface-sunken: #eff4f5;
+  --border: #dde6e8;
+  --border-subtle: #e8eeef;
+  --border-control: #cfdadd;
+  --border-control-hover: #a3b6ba;
+
+  --text: #142226;
+  --text-label: #2b3e43;
+  --text-muted: #5d6f74;
+  --text-subtle: #8a9a9e;
+
+  /* Semantic */
+  --success: #23966f;
+  --success-text: #186f52;
+  --success-soft: #e3f4ed;
+  --success-line: #b4dccb;
+  --warning: #d98e1f;
+  --warning-text: #87560b;
+  --warning-soft: #fdf2df;
+  --warning-line: #f0d29f;
+  --danger: #d2504b;
+  --danger-text: #a8352f;
+  --danger-soft: #fcecea;
+  --danger-line: #f0c2be;
+
+  /* Spacing (4px scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(15, 59, 66, 0.05);
+  --shadow-card: 0 1px 2px rgba(15, 59, 66, 0.04), 0 6px 20px -8px rgba(15, 59, 66, 0.1);
+  --shadow-raised: 0 2px 4px rgba(15, 59, 66, 0.06), 0 12px 28px -10px rgba(15, 59, 66, 0.18);
+  --shadow-pop: 0 20px 48px -12px rgba(11, 45, 51, 0.35), 0 4px 12px rgba(11, 45, 51, 0.1);
+  --focus-ring: 0 0 0 3px rgba(0, 145, 199, 0.2);
+  --focus-ring-danger: 0 0 0 3px rgba(210, 80, 75, 0.18);
+
+  /* Typography */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fs-2xs: 0.6875rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.875rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+  --lh-tight: 1.25;
+  --lh-base: 1.5;
+
+  /* Layout */
+  --sidebar-w: 292px;
+  --topbar-h: 64px;
+  --control-h: 40px;
+  --control-h-sm: 32px;
+  --content-max: 1120px;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}

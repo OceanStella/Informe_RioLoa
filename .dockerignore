@@ -1,0 +1,8 @@
+node_modules
+dist
+server-dist
+.git
+.env
+config/local-config.json
+*.log
+.local-reports

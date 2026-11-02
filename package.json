@@ -1,0 +1,51 @@
+{
+  "name": "informe-octavio",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:server": "tsx watch server/index.ts",
+    "build": "tsc -b && vite build && tsc -p tsconfig.server.json",
+    "build:server": "tsc -p tsconfig.server.json",
+    "start": "node server-dist/index.js",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "tsx --test tests/unit.test.ts",
+    "test:integration": "tsx --test --test-concurrency=1 tests/integration.test.ts",
+    "migrate:config": "tsx scripts/migrate-config-to-firestore.ts",
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json"
+  },
+  "dependencies": {
+    "@azure/msal-node": "^7.1.2",
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
+    "@google-cloud/firestore": "^9.4.0",
+    "@google-cloud/storage": "^8.4.0",
+    "@react-pdf/renderer": "^4.9.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.48.0",
+    "multer": "^1.4.5-lts.2",
+    "nodemailer": "^10.0.11",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.5",
+    "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^1.4.13",
+    "@types/node": "^24.13.3",
+    "@types/nodemailer": "^8.0.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "google-auth-library": "^11.3.2",
+    "oxlint": "^1.81.0",
+    "tsx": "^4.20.5",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0"
+  }
+}

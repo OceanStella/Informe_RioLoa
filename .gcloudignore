@@ -1,0 +1,17 @@
+.gcloudignore
+.git
+.gitignore
+.node_modules
+node_modules
+dist
+server-dist
+.env
+.env.*
+config/local-config.json
+*.log
+.cursor
+.vscode
+agent-transcripts
+*.md
+.local-reports
+tests

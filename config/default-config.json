@@ -1,0 +1,140 @@
+{
+  "generalAreas": [
+    {
+      "id": "ga-pozas",
+      "name": "Pozas"
+    }
+  ],
+  "activityAreas": [
+    {
+      "id": "aa-poza-7",
+      "name": "Poza 7"
+    },
+    {
+      "id": "aa-poza-8",
+      "name": "Poza 8"
+    },
+    {
+      "id": "aa-poza-9d",
+      "name": "Poza 9D"
+    },
+    {
+      "id": "aa-poza-13",
+      "name": "Poza 13"
+    },
+    {
+      "id": "aa-poza-14",
+      "name": "Poza 14"
+    },
+    {
+      "id": "aa-poza-24",
+      "name": "Poza 24"
+    },
+    {
+      "id": "aa-b4",
+      "name": "B4"
+    },
+    {
+      "id": "aa-botadero-0502",
+      "name": "Botadero 0502"
+    },
+    {
+      "id": "aa-cancha-halita",
+      "name": "Cancha Halita"
+    },
+    {
+      "id": "aa-patio-rip",
+      "name": "Patio RIP"
+    },
+    {
+      "id": "aa-otro",
+      "name": "Otro"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "tvfz-13",
+      "code": "TVFZ-13",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "tygb-99",
+      "code": "TYGB-99",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "tygc-17",
+      "code": "TYGC-17",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "tygb-69",
+      "code": "TYGB-69",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "tygc-27",
+      "code": "TYGC-27",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "vccw73",
+      "code": "VCCW73",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "vccw69",
+      "code": "VCCW69",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "vccw68",
+      "code": "VCCW68",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "vccw65",
+      "code": "VCCW65",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "tvkt41",
+      "code": "TVKT41",
+      "type": "truck",
+      "capacityM3": 18
+    },
+    {
+      "id": "exc-vrdh-65",
+      "code": "EXC VRDH 65",
+      "type": "machinery",
+      "capacityM3": null
+    },
+    {
+      "id": "exc-vrdk-44",
+      "code": "EXC VRDK-44",
+      "type": "machinery",
+      "capacityM3": null
+    },
+    {
+      "id": "exc-vfb2-12",
+      "code": "EXC VFB2-12",
+      "type": "machinery",
+      "capacityM3": null
+    },
+    {
+      "id": "cf-ttfk-98",
+      "code": "CF TTFK-98",
+      "type": "machinery",
+      "capacityM3": null
+    }
+  ]
+}

@@ -27,7 +27,7 @@ import { refreshDisplayedErrors } from '../utils/validationDisplay';
 import { buildExpandActions } from '../utils/validationExpand';
 
 export function ReportPage() {
-  const { report, dispatch, lostPhotos } = useReport();
+  const { report, dispatch, lostPhotos, staleDraftDate } = useReport();
   const { config } = useConfig();
   const { panel, progress } = useShellSlots();
   const [flatErrors, setFlatErrors] = useState<FlatValidationErrors>({});
@@ -208,7 +208,7 @@ export function ReportPage() {
         <main className="app-main">
           <PageHead title="Informe Diario de Operaciones" />
 
-          {(report.revisedFrom || report.carriedFrom || missingPhotos || hasErrors) && (
+          {(report.revisedFrom || report.carriedFrom || staleDraftDate || missingPhotos || hasErrors) && (
             <div className="alert-stack">
               {report.revisedFrom && (
                 <div className="global-alert global-alert-warning revision-notice" role="status">
@@ -228,6 +228,13 @@ export function ReportPage() {
                 <div className="global-alert global-alert-info" role="status">
                   <Info size={16} aria-hidden="true" />
                   Partes del informe del {formatShortDate(report.carriedFrom)}. Confirma operadores y horómetros iniciales.
+                </div>
+              )}
+              {staleDraftDate && (
+                <div className="global-alert global-alert-warning" role="status">
+                  <TriangleAlert size={16} aria-hidden="true" />
+                  Este borrador tiene fecha {formatShortDate(staleDraftDate)}. Si es el turno de hoy, cambia la fecha antes
+                  de enviar.
                 </div>
               )}
               {missingPhotos && (

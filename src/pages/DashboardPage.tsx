@@ -272,7 +272,7 @@ function CreateReport({ canStartFromLast }: { canStartFromLast: boolean | null }
   );
 }
 
-function RecentReports({ reports }: { reports: ReportListItem[] | null }) {
+function RecentReports({ reports, failed }: { reports: ReportListItem[] | null; failed: boolean }) {
   const pending = reports?.filter((report) => report.status === 'SEND_FAILED' || report.canEdit).length ?? 0;
 
   return (
@@ -287,7 +287,8 @@ function RecentReports({ reports }: { reports: ReportListItem[] | null }) {
           {pending} por corregir o reenviar
         </Link>
       )}
-      {!reports && <RecentReportsSkeleton />}
+      {failed && <p className="empty-state">No fue posible cargar los últimos informes.</p>}
+      {!reports && !failed && <RecentReportsSkeleton />}
       {reports?.length === 0 && <p className="empty-state">Aún no hay informes.</p>}
       {reports && reports.length > 0 && (
         <ul className="recent-list">
@@ -310,30 +311,36 @@ export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [recent, setRecent] = useState<ReportListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recentFailed, setRecentFailed] = useState(false);
 
+  // Each block loads on its own: a failing chart must not leave the recent reports loading forever.
   useEffect(() => {
-    const load = async () => {
+    const loadSummary = async () => {
       try {
-        const [summaryResponse, reportsResponse] = await Promise.all([
-          fetch('/api/dashboard/summary', { credentials: 'include' }),
-          fetch(`/api/reports?limit=${RECENT_REPORTS}`, { credentials: 'include' }),
-        ]);
-        const summaryPayload = (await summaryResponse.json()) as { ok?: boolean; summary?: DashboardSummary };
-        const reportsPayload = (await reportsResponse.json()) as { ok?: boolean; reports?: ReportListItem[] };
-        if (!summaryPayload.ok || !summaryPayload.summary || !reportsPayload.ok || !reportsPayload.reports) {
-          throw new Error();
-        }
-        setSummary(summaryPayload.summary);
-        setRecent(reportsPayload.reports);
+        const response = await fetch('/api/dashboard/summary', { credentials: 'include' });
+        const payload = (await response.json()) as { ok?: boolean; summary?: DashboardSummary };
+        if (!payload.ok || !payload.summary) throw new Error();
+        setSummary(payload.summary);
       } catch {
-        setError('No fue posible cargar el dashboard.');
+        setError('No fue posible cargar los gráficos del dashboard.');
       }
     };
-    void load();
+    const loadRecent = async () => {
+      try {
+        const response = await fetch(`/api/reports?limit=${RECENT_REPORTS}`, { credentials: 'include' });
+        const payload = (await response.json()) as { ok?: boolean; reports?: ReportListItem[] };
+        if (!payload.ok || !payload.reports) throw new Error();
+        setRecent(payload.reports);
+      } catch {
+        setRecentFailed(true);
+      }
+    };
+    void loadSummary();
+    void loadRecent();
   }, []);
 
   // Null until known, so the button does not pop in beside "Nuevo informe".
-  const canStartFromLast = error
+  const canStartFromLast = recentFailed
     ? false
     : (recent?.some((report) => report.status === 'IN_REVIEW' || report.status === 'APPROVED') ?? null);
 
@@ -350,7 +357,7 @@ export default function DashboardPage() {
 
         <div className="dashboard-top">
           <CreateReport canStartFromLast={canStartFromLast} />
-          <RecentReports reports={recent} />
+          <RecentReports reports={recent} failed={recentFailed} />
         </div>
 
         {!summary && !error && <ChartsSkeleton />}

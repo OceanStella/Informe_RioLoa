@@ -3,17 +3,38 @@ import { ChevronDown, Lock, LogOut, Pencil, Settings, Trash2, UserRound } from '
 import { useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useGuestProfile } from '../../context/GuestProfileContext';
+import { useReport } from '../../context/ReportContext';
 import { useShell } from '../../context/ShellContext';
+import { clearDraft } from '../../utils/reportDraft';
 
 export function UserMenu({ showAdmin }: { showAdmin: boolean }) {
   const { user, logout, mvpAccess, lockMvpAccess } = useAuth();
   const { profile, clearProfile, setEditing } = useGuestProfile();
+  const { dispatch } = useReport();
   const { openAdmin } = useShell();
   // The closing menu hands focus back to its trigger: a modal opened any sooner would lose its field.
   const afterClose = useRef<(() => void) | null>(null);
 
+  // On a shared computer the next person must not inherit the previous one's unsent report.
+  const forgetProfile = () => {
+    clearDraft();
+    dispatch({ type: 'RESET_REPORT' });
+    clearProfile();
+  };
+
   const identity = user ?? profile;
-  if (!identity) return null;
+  if (!identity) {
+    return showAdmin ? (
+      <button
+        type="button"
+        className="btn btn-ghost btn-icon-only"
+        aria-label="Administrar parámetros"
+        onClick={() => void openAdmin()}
+      >
+        <Settings size={18} aria-hidden="true" />
+      </button>
+    ) : null;
+  }
 
   const label = identity.displayName || identity.email;
 
@@ -72,7 +93,7 @@ export function UserMenu({ showAdmin }: { showAdmin: boolean }) {
                     Bloquear acceso
                   </Menu.Item>
                 )}
-                <Menu.Item className="user-menu-item is-danger" onClick={clearProfile}>
+                <Menu.Item className="user-menu-item is-danger" onClick={forgetProfile}>
                   <Trash2 size={14} aria-hidden="true" />
                   Borrar perfil
                 </Menu.Item>

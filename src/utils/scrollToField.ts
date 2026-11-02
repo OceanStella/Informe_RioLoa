@@ -5,7 +5,7 @@ export function scrollToValidationField(path: string | null): void {
   if (container) {
     container.scrollIntoView({ behavior: 'smooth', block: 'center' });
     const focusable = container.querySelector<HTMLElement>(
-      'input:not([type="hidden"]), select, textarea, button.hardness-btn',
+      'input:not([type="hidden"]), button.select-trigger, textarea, button.hardness-btn',
     );
     if (focusable) {
       focusable.focus({ preventScroll: true });

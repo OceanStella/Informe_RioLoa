@@ -137,6 +137,7 @@ La cuenta de servicio ya tiene `roles/secretmanager.secretAccessor` sobre ese se
 | `POST /api/reports/:id/resend-email` | |
 | `GET /api/reports/:id/pdf` | |
 | `GET /api/reports/:id/edit-data`, `GET /api/reports/:id/photos/*` | Reconstrucción de un rechazado |
+| `GET /api/reports/latest-form` | Partir del último informe |
 | `GET /api/dashboard/summary` | |
 | `/api/admin/*` | Además conserva `requireAdmin` |
 | `/`, `/dashboard`, `/history`, `/report` | La pantalla del gate se muestra en el navegador; lo que protege son las APIs |

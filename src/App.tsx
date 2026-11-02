@@ -1,7 +1,9 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
+import { lazy, useEffect, useState, type ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { GuestProfileGate } from './components/GuestProfileModal';
+import { AppShell } from './components/ui/AppShell';
+import { PageSkeleton } from './components/ui/Skeletons';
 import { ConfigProvider } from './context/ConfigContext';
 import { GuestProfileProvider } from './context/GuestProfileContext';
 import { ReportProvider } from './context/ReportContext';
@@ -11,13 +13,24 @@ import { LoginPage } from './pages/LoginPage';
 import { MvpAccessPage } from './pages/MvpAccessPage';
 import { ReportPage } from './pages/ReportPage';
 import { ReviewPage } from './pages/ReviewPage';
+import logoUrl from './assets/rioloa-logo.png';
 import './App.css';
 
 // Recharts only loads with this view.
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 
-function PageLoading() {
-  return <p className="page-loading">Cargando…</p>;
+/** Before the session is known, so before there is a shell to render. */
+function AppLoading() {
+  return (
+    <>
+      <header className="topbar">
+        <div className="topbar-inner">
+          <img src={logoUrl} alt="RIOLOA" className="topbar-logo" width={75} height={24} />
+        </div>
+      </header>
+      <PageSkeleton />
+    </>
+  );
 }
 
 function ScrollToTop() {
@@ -48,7 +61,7 @@ function AuthGate({ children }: { children: ReactNode }) {
     if (!loading && !mvpLocked && !isReviewLink) setAppEntered(true);
   }, [loading, mvpLocked, isReviewLink]);
 
-  if (loading || (needsLogin && isReviewLink)) return <PageLoading />;
+  if (loading || (needsLogin && isReviewLink)) return <AppLoading />;
   if (needsLogin) return <LoginPage />;
 
   return (
@@ -70,15 +83,15 @@ export default function App() {
                 <ShellProvider>
                   <ScrollToTop />
                   <GuestProfileGate />
-                  <Suspense fallback={<PageLoading />}>
-                    <Routes>
+                  <Routes>
+                    <Route element={<AppShell />}>
                       <Route path="/dashboard" element={<DashboardPage />} />
                       <Route path="/history" element={<HistoryPage />} />
                       <Route path="/report" element={<ReportPage />} />
                       <Route path="/review/:token" element={<ReviewPage />} />
-                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                    </Routes>
-                  </Suspense>
+                    </Route>
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                  </Routes>
                 </ShellProvider>
               </ReportProvider>
             </ConfigProvider>

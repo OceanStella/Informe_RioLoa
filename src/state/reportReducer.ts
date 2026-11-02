@@ -1,4 +1,5 @@
 import type { Activity, ReportAction, ReportData, WatermasterData } from '../types/report';
+import { localIsoDate } from '../utils/dates';
 import { revokePhotoPreview } from '../utils/images';
 
 function createWatermasterActivity(): Activity {
@@ -39,9 +40,8 @@ function createGenericActivity(): Activity {
 }
 
 export function createInitialReport(): ReportData {
-  const today = new Date().toISOString().split('T')[0];
   return {
-    date: today,
+    date: localIsoDate(),
     supervisor: '',
     area: '',
     apr: '',

@@ -1,11 +1,10 @@
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { Tone } from './KpiStrip';
+
+export type Tone = 'teal' | 'cyan' | 'aqua' | 'sand' | 'coral' | 'indigo';
 
 interface SectionHeaderProps {
   title: string;
-  step?: number;
-  totalSteps?: number;
   icon?: LucideIcon;
   tone?: Tone;
   description?: ReactNode;
@@ -15,8 +14,6 @@ interface SectionHeaderProps {
 
 export function SectionHeader({
   title,
-  step,
-  totalSteps = 5,
   icon: Icon,
   tone = 'teal',
   description,
@@ -32,11 +29,6 @@ export function SectionHeader({
           </span>
         )}
         <div className="section-heading-text">
-          {step != null && (
-            <p className="section-eyebrow">
-              Paso {step} de {totalSteps}
-            </p>
-          )}
           <h2 className="section-title" id={titleId}>
             {title}
           </h2>

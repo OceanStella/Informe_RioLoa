@@ -51,6 +51,8 @@ const EMAIL_FAILED_MESSAGE = 'El informe quedó guardado, pero no fue posible en
 const NOT_FOUND_MESSAGE = 'Informe no encontrado.';
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
+const LATEST_FORM_SEARCH = 20;
+const STANDING_STATUSES = new Set(['IN_REVIEW', 'APPROVED']);
 
 function isPdf(buffer: Buffer): boolean {
   return buffer.subarray(0, 5).toString('latin1') === '%PDF-';
@@ -295,6 +297,19 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Failed to list reports:', error);
     return res.status(500).json({ ok: false, message: 'No fue posible cargar el historial.' });
+  }
+});
+
+/** The form of the latest report that stands, to start the next shift from it. */
+router.get('/latest-form', async (req, res) => {
+  try {
+    const recent = await listReports(LATEST_FORM_SEARCH);
+    const latest = recent.find((report) => report.formSnapshot && STANDING_STATUSES.has(report.status));
+    if (!latest) return res.status(404).json({ ok: false, message: 'Aún no hay un informe del que partir.' });
+    return res.json({ ok: true, reportDate: latest.reportDate, formSnapshot: latest.formSnapshot });
+  } catch (error) {
+    console.error('Failed to load the latest report form:', error);
+    return res.status(500).json({ ok: false, message: 'No fue posible cargar el último informe.' });
   }
 });
 

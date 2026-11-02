@@ -1,4 +1,3 @@
-import { TableProperties } from 'lucide-react';
 import { useState } from 'react';
 import { useReport } from '../context/ReportContext';
 import { getActivityEquipmentCodes, resolveActivityArea, resolveActivityType } from '../utils/calculations';
@@ -12,12 +11,8 @@ export function ActivitiesSummary() {
   return (
     <section className="report-section summary-card" id="sec-summary" aria-labelledby="sec-summary-title">
       <SectionHeader
-        step={4}
-        icon={TableProperties}
-        tone="sand"
         title="Resumen de Actividades"
         titleId="sec-summary-title"
-        description="Revisa las actividades registradas antes de generar el informe."
         actions={
           <CollapseToggle
             collapsed={collapsed}

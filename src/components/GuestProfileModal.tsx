@@ -56,6 +56,7 @@ function GuestProfileForm({ initial, onSave, onCancel }: GuestProfileFormProps) 
             </label>
             <input
               id="guest-name"
+              autoFocus
               type="text"
               autoComplete="name"
               maxLength={200}

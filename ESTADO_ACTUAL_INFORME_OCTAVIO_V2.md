@@ -23,6 +23,13 @@ Revisión `informe-octavio-v2-00007-qs7`. Esta sección prevalece sobre lo que d
 - **Access Gate:** activo (`MVP_ACCESS_ENABLED=true`), con el código en el secreto `informe-octavio-v2-mvp-access-code`.
 - **Pruebas:** `npm test` y, con el emulador de Firestore, `npm run test:integration`.
 
+**En local, sin desplegar (2026-11-01):**
+
+- Dashboard centrado en crear: *Crear informe* (`src/data/reportTypes.ts`), *Últimos informes* y gráficos con sus cifras; sin tarjetas KPI.
+- Borrador automático en `localStorage['informeOctavioReportDraft']`, por navegador y sin fotos (`src/utils/reportDraft.ts`).
+- *Partir del último*: `GET /api/reports/latest-form` y `src/utils/shiftCarryOver.ts`. Copia supervisor, área, APR y dotación; cada horómetro y KM inicial es el final anterior. Nunca parte de un rechazado.
+- La fecha por defecto usa el reloj local, no UTC.
+
 **Desplegado en `00007-qs7`:**
 
 - Limpieza del formulario y modal de éxito tras un envío confirmado; protección contra envíos duplicados.
@@ -45,10 +52,9 @@ No requiere migración ni cambios de variables. Detalle en [docs/data/FIRESTORE_
 
 Shell:
 
-- Desktop ≥1200px: sidebar fija 292px (logo, turno, avance, pasos, Admin).
-- `<1200px`: sidebar oculta; logo y Admin en la topbar.
-- Topbar sticky + barra de progreso.
-- KPIs, secciones 1–5, panel oscuro de generación.
+- Topbar sticky en toda la app: logo, links (Dashboard, Historial, Generar informe) y menú de cuenta, donde vive Administrar parámetros.
+- Panel lateral de 292px solo en `/report`, desde 1200px: avance y secciones. Por debajo abre como cajón; en ≤860px el cajón también lleva los links.
+- `/report`: secciones 1–5 y panel oscuro de generación, sin KPIs. Detalle en la guía de diseño, sección "Cambios del 2026-11-01".
 
 Contratos DOM que usa la lógica (no romper):
 

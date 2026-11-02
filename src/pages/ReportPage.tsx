@@ -1,47 +1,35 @@
-import {
-  CalendarDays,
-  CircleCheck,
-  Download,
-  Droplets,
-  Eye,
-  Layers,
-  Plus,
-  Send,
-  Settings,
-  TriangleAlert,
-  Truck,
-  UsersRound,
-} from 'lucide-react';
+import { Download, Eye, Info, Plus, Send, TriangleAlert } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ActiveRosterSection } from '../components/ActiveRosterSection';
 import { ActivitiesSummary } from '../components/ActivitiesSummary';
 import { ActivityCard } from '../components/ActivityCard';
 import { GeneralInfoForm } from '../components/GeneralInfoForm';
-import { buildReportOverview, formatReportDate } from '../components/reportOverview';
+import { buildReportOverview } from '../components/reportOverview';
 import { ReportSentModal } from '../components/ReportSentModal';
 import { SendReportModal } from '../components/SendReportModal';
-import { AppShell } from '../components/ui/AppShell';
-import { KpiStrip } from '../components/ui/KpiStrip';
+import { PageHead } from '../components/ui/PageHead';
 import { ProgressRing } from '../components/ui/ProgressRing';
 import { SectionHeader } from '../components/ui/SectionHeader';
+import { useShellSlots } from '../components/ui/shellSlots';
 import { StepNav, type StepNavItem } from '../components/ui/StepNav';
-import { TopBar } from '../components/ui/TopBar';
 import { useConfig } from '../context/ConfigContext';
 import { useReport } from '../context/ReportContext';
-import { useShell } from '../context/ShellContext';
-import { formatMetric, resolveActivityArea } from '../utils/calculations';
+import { resolveActivityArea } from '../utils/calculations';
 import { formatShortDate } from '../utils/dates';
 import { prepareReportForPdf } from '../utils/images';
 import { downloadBlob, generateReportPdfBlob, getReportFileName, openBlobInNewTab } from '../utils/pdf';
 import { scrollToValidationField } from '../utils/scrollToField';
+import { countPhotos } from '../utils/reportDraft';
 import { collectLiveErrors, validateReport, type FlatValidationErrors } from '../utils/validation';
+import { pluralize } from '../utils/text';
 import { refreshDisplayedErrors } from '../utils/validationDisplay';
 import { buildExpandActions } from '../utils/validationExpand';
 
 export function ReportPage() {
-  const { report, dispatch } = useReport();
+  const { report, dispatch, lostPhotos } = useReport();
   const { config } = useConfig();
-  const { openAdmin } = useShell();
+  const { panel, progress } = useShellSlots();
   const [flatErrors, setFlatErrors] = useState<FlatValidationErrors>({});
   const [validationAttempted, setValidationAttempted] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -141,7 +129,7 @@ export function ReportPage() {
   const hasErrors = Object.keys(displayErrors).length > 0;
 
   const overview = buildReportOverview(report, config, displayErrors);
-  const reportDate = formatReportDate(report.date);
+  const missingPhotos = lostPhotos > 0 && countPhotos(report) === 0;
 
   const stepItems: StepNavItem[] = [
     {
@@ -161,7 +149,7 @@ export function ReportPage() {
     {
       id: 'sec-activities',
       label: 'Actividades',
-      meta: `${overview.activityCount} registradas · ${overview.activitiesReady} listas`,
+      meta: `${pluralize(overview.activityCount, 'registrada', 'registradas')} · ${pluralize(overview.activitiesReady, 'lista', 'listas')}`,
       status: overview.status.activities,
       children:
         report.activities.length > 1
@@ -187,105 +175,40 @@ export function ReportPage() {
     },
   ];
 
-  const statusPill = hasErrors ? (
-    <span className="status-pill is-warning">
-      <TriangleAlert size={14} aria-hidden="true" />
-      {overview.errorCount} pendientes
-    </span>
-  ) : (
-    <span className="status-pill is-ok">
-      <CircleCheck size={14} aria-hidden="true" />
-      Sin observaciones
-    </span>
-  );
-
   return (
-    <AppShell
-      sidebarCards={
-        <div className="sidebar-card progress-card">
-          <ProgressRing value={overview.progress} />
-          <div>
-            <p className="progress-title">Avance del informe</p>
-            <p className="progress-sub">
-              {overview.errorCount
-                ? `${overview.errorCount} campos por revisar`
-                : overview.progress === 100
-                  ? 'Listo para generar'
-                  : 'Completa las secciones'}
-            </p>
-          </div>
-        </div>
-      }
-      sidebarSteps={<StepNav title="Secciones del informe" items={stepItems} />}
-    >
-        <div className="topbar-sticky">
-        <TopBar
-          eyebrow="Operaciones · Área de Pozas"
-          title="Informe Diario de Operaciones"
-          actions={
-            <>
-              <span className="date-chip">
-                <CalendarDays size={15} aria-hidden="true" />
-                {reportDate}
-              </span>
-              {statusPill}
-              <button
-                type="button"
-                className="btn btn-ghost btn-icon-only topbar-admin"
-                onClick={() => void openAdmin()}
-                aria-label="Administrar parámetros"
-              >
-                <Settings size={18} aria-hidden="true" />
-              </button>
-              <button type="button" className="btn btn-primary topbar-generate" onClick={handleGenerate} disabled={isGenerating}>
-                <Send size={15} aria-hidden="true" />
-                <span>Generar informe</span>
-              </button>
-            </>
-          }
-        />
-        <div className="topbar-progress" aria-hidden="true">
-          <span style={{ width: `${overview.progress}%` }} />
-        </div>
-        </div>
+    <>
+      {panel &&
+        createPortal(
+          <>
+            <div className="sidebar-card progress-card">
+              <ProgressRing value={overview.progress} />
+              <div>
+                <p className="progress-title">Avance del informe</p>
+                <p className="progress-sub">
+                  {overview.errorCount
+                    ? `${overview.errorCount} campos por revisar`
+                    : overview.progress === 100
+                      ? 'Listo para generar'
+                      : 'Completa las secciones'}
+                </p>
+              </div>
+            </div>
+            <StepNav title="Secciones del informe" items={stepItems} />
+          </>,
+          panel,
+        )}
+      {progress &&
+        createPortal(
+          <div className="topbar-progress" aria-hidden="true">
+            <span style={{ width: `${overview.progress}%` }} />
+          </div>,
+          progress,
+        )}
 
         <main className="app-main">
-          <KpiStrip
-            items={[
-              {
-                label: 'Equipos en dotación',
-                value: String(overview.rosterTotal),
-                sub: `${overview.rosterTrucks} camiones · ${overview.rosterMachinery} maquinaria`,
-                icon: UsersRound,
-                tone: 'aqua',
-              },
-              {
-                label: 'Actividades',
-                value: String(overview.activityCount),
-                sub: `${overview.activitiesReady} con datos completos`,
-                icon: Layers,
-                tone: 'teal',
-              },
-              {
-                label: 'M³ transportados',
-                value: formatMetric(overview.truckM3),
-                unit: 'm³',
-                sub: 'Camiones tolva',
-                icon: Truck,
-                tone: 'sand',
-              },
-              {
-                label: 'Volumen Watermaster',
-                value: formatMetric(overview.watermasterM3),
-                unit: 'm³',
-                sub: 'Draga · volumen removido',
-                icon: Droplets,
-                tone: 'cyan',
-              },
-            ]}
-          />
+          <PageHead title="Informe Diario de Operaciones" />
 
-          {(report.revisedFrom || hasErrors) && (
+          {(report.revisedFrom || report.carriedFrom || missingPhotos || hasErrors) && (
             <div className="alert-stack">
               {report.revisedFrom && (
                 <div className="global-alert global-alert-warning revision-notice" role="status">
@@ -301,6 +224,18 @@ export function ReportPage() {
                   </div>
                 </div>
               )}
+              {report.carriedFrom && (
+                <div className="global-alert global-alert-info" role="status">
+                  <Info size={16} aria-hidden="true" />
+                  Partes del informe del {formatShortDate(report.carriedFrom)}. Confirma operadores y horómetros iniciales.
+                </div>
+              )}
+              {missingPhotos && (
+                <div className="global-alert global-alert-warning" role="status">
+                  <TriangleAlert size={16} aria-hidden="true" />
+                  Recuperamos tu borrador, pero las fotos no se guardan: vuelve a adjuntarlas.
+                </div>
+              )}
               {hasErrors && (
                 <div className="global-alert global-alert-warning" role="status">
                   <TriangleAlert size={16} aria-hidden="true" />
@@ -314,20 +249,7 @@ export function ReportPage() {
           <ActiveRosterSection errors={displayErrors} />
 
           <section className="report-section" id="sec-activities" aria-labelledby="sec-activities-title">
-            <SectionHeader
-              step={3}
-              icon={Layers}
-              tone="teal"
-              title="Detalle de actividades"
-              titleId="sec-activities-title"
-              description="Registra cada actividad del turno con su poza, tipo, equipos y fotografías."
-              actions={
-                <button type="button" className="btn btn-secondary" onClick={handleAddActivity}>
-                  <Plus size={16} aria-hidden="true" />
-                  Agregar Actividad
-                </button>
-              }
-            />
+            <SectionHeader title="Detalle de actividades" titleId="sec-activities-title" />
             <div className="activities-list">
               {report.activities.map((activity, index) => (
                 <ActivityCard
@@ -350,12 +272,8 @@ export function ReportPage() {
           <section className="report-section generate-section" id="sec-generate" aria-labelledby="sec-generate-title">
             <div className="generate-panel">
               <div className="generate-copy">
-                <p className="generate-eyebrow">Paso 5 de 5</p>
                 <h2 className="generate-title" id="sec-generate-title">Generar y enviar informe</h2>
-                <p>
-                  Al generar, el informe se valida completo. Si hay errores, la página se desplaza al primer campo
-                  pendiente.
-                </p>
+                <p>Antes de enviar se revisa todo el informe. Si falta algo, te llevamos al campo.</p>
                 {hasErrors && (
                   <p className="generate-warning">
                     <TriangleAlert size={15} aria-hidden="true" />
@@ -405,6 +323,6 @@ export function ReportPage() {
         buildPdf={buildPdf}
       />
       {sentResult && <ReportSentModal ccDelivered={sentResult.ccDelivered} onClose={() => setSentResult(null)} />}
-    </AppShell>
+    </>
   );
 }

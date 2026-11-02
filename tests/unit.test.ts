@@ -8,6 +8,11 @@ import type { ReportRecord } from '../server/reports/reportTypes.js';
 import { createReviewToken, hashReviewToken, isReviewTokenFormat } from '../server/reports/reviewToken.js';
 import { sanitizeReturnTo } from '../server/routes/auth.js';
 import { buildDashboardSummary } from '../server/services/dashboardService.js';
+import type { ReportData } from '../src/types/report.js';
+import { localIsoDate } from '../src/utils/dates.js';
+import { hasReportContent, serializeForm } from '../src/utils/reportDraft.js';
+import { carryOverShift } from '../src/utils/shiftCarryOver.js';
+import { createInitialReport } from '../src/state/reportReducer.js';
 import { buildLogoutUrl, resolveIdentity } from '../server/services/entraAuthService.js';
 
 const metrics = {
@@ -226,3 +231,60 @@ test('dashboard does not invent rates without data', () => {
   assert.equal(summary.watermasterHourlyAverage, null);
   assert.equal(summary.totals.reports, 0);
 });
+
+test('the report date follows the local clock, not UTC', () => {
+  // 22:05 on the 1st in Chile is already the 2nd in UTC.
+  assert.equal(localIsoDate(new Date(2026, 10, 1, 22, 5)), '2026-11-01');
+  assert.equal(localIsoDate(new Date(2026, 0, 9, 0, 30)), '2026-01-09');
+});
+
+test('an untouched form is not a draft, and a draft never carries photos', () => {
+  const blank = createInitialReport();
+  assert.equal(hasReportContent(blank), false);
+  assert.equal(hasReportContent({ ...blank, date: '2020-01-01' }), false);
+  assert.equal(hasReportContent({ ...blank, supervisor: 'Ana' }), true);
+
+  const [first] = blank.activities;
+  const withPhoto = { ...blank, activities: [{ ...first, beforePhoto: { file: {} as File, previewUrl: 'blob:x' } }] };
+  assert.equal(JSON.stringify(JSON.parse(serializeForm(withPhoto))).includes('beforePhoto'), false);
+});
+
+test('a new shift opens each meter at the reading the last one closed with', () => {
+  const blank = createInitialReport();
+  const previous: ReportData = {
+    ...blank,
+    date: '2026-10-31',
+    supervisor: 'Ana',
+    area: 'Pozas',
+    apr: 'Luis',
+    roster: [
+      { equipmentId: 't1', equipmentCode: 'TVFZ-13', equipmentType: 'truck', operator: 'Pedro', hourmeterStart: '100', hourmeterEnd: '108', kmStart: '1000', kmEnd: '1050', collapsed: true },
+      { equipmentId: 'm1', equipmentCode: 'EXC', equipmentType: 'machinery', operator: 'Rosa', hourmeterStart: '5', hourmeterEnd: '9', collapsed: false },
+      { equipmentId: 'gone', equipmentCode: 'OLD', equipmentType: 'machinery', operator: 'X', hourmeterStart: '1', hourmeterEnd: '2', collapsed: false },
+    ],
+    activities: [
+      {
+        ...blank.activities[0],
+        description: 'Solo de ese turno',
+        watermaster: { ...blank.activities[0].watermaster!, sector: 'Norte', operator: 'Ivo', hourmeterEnd: '700', pumpHourmeterEnd: '300', manufacturerPerformance: '90' },
+      },
+    ],
+  };
+
+  const next = carryOverShift(previous, previous.date, ['t1', 'm1']);
+
+  assert.equal(next.carriedFrom, '2026-10-31');
+  assert.equal(next.supervisor, 'Ana');
+  assert.deepEqual(next.roster.map((item) => item.equipmentId), ['t1', 'm1']);
+  assert.deepEqual(
+    [next.roster[0].operator, next.roster[0].hourmeterStart, next.roster[0].hourmeterEnd, next.roster[0].kmStart, next.roster[0].kmEnd, next.roster[0].collapsed],
+    ['Pedro', '108', '', '1050', '', false],
+  );
+  assert.equal(next.roster[1].kmStart, undefined);
+  assert.equal(next.activities.length, 1);
+  assert.equal(next.activities[0].description, '');
+  assert.equal(next.activities[0].watermaster?.hourmeterStart, '700');
+  assert.equal(next.activities[0].watermaster?.pumpHourmeterStart, '300');
+  assert.equal(next.activities[0].watermaster?.hourmeterEnd, '');
+});
+

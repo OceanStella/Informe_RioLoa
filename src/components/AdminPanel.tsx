@@ -15,10 +15,8 @@ import { useMemo, useState } from 'react';
 import { useConfig } from '../context/ConfigContext';
 import { useReport } from '../context/ReportContext';
 import type { AppConfig, EquipmentConfigItem, NamedConfigItem } from '../types/config';
-import { AppSidebar } from './ui/AppSidebar';
-import type { Tone } from './ui/KpiStrip';
-import { SectionHeader } from './ui/SectionHeader';
-import { TopBar } from './ui/TopBar';
+import { PageHead } from './ui/PageHead';
+import { SectionHeader, type Tone } from './ui/SectionHeader';
 
 interface AdminPanelProps {
   onBack: () => void;
@@ -210,60 +208,18 @@ export function AdminPanel({ onBack, backLabel = 'Volver al informe' }: AdminPan
   ];
 
   return (
-    <div className="app-shell has-sidebar">
-      <AppSidebar
-        context="Administración"
-        footer={
-          <button type="button" className="sidebar-admin" onClick={onBack}>
-            <ArrowLeft size={16} aria-hidden="true" />
-            {backLabel}
-          </button>
-        }
-      >
-        <div className="sidebar-card">
-          <p className="sidebar-label">Configuración</p>
-          <p className="sidebar-note">Los cambios se guardan en la configuración persistente.</p>
-        </div>
-        <nav className="step-nav" aria-label="Parámetros">
-          <p className="sidebar-label">Parámetros</p>
-          <ol className="step-list is-plain">
-            {tabs.map((tab) => (
-              <li key={tab.id} className={`step-item is-idle${activeTab === tab.id ? ' is-active' : ''}`}>
-                <button
-                  type="button"
-                  className="step-link"
-                  aria-current={activeTab === tab.id ? 'page' : undefined}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <span className="step-marker" aria-hidden="true" />
-                  <span className="step-text">
-                    <span className="step-label">{tab.label}</span>
-                    <span className="step-meta">
-                      {tab.count} {tab.id === 'trucks' || tab.id === 'machinery' ? 'equipos' : 'registros'}
-                    </span>
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      </AppSidebar>
-
-      <div className="workspace">
-        <div className="topbar-sticky">
-        <TopBar
-          eyebrow="Configuración"
-          title="Administración de parámetros"
-          actions={
-            <button type="button" className="btn btn-secondary btn-sm" onClick={onBack}>
-              <ArrowLeft size={16} aria-hidden="true" />
-              {backLabel}
-            </button>
-          }
-        />
-        </div>
-
+    <>
         <main className="app-main admin-main">
+          <PageHead
+            title="Administración de parámetros"
+            actions={
+              <button type="button" className="btn btn-secondary btn-sm" onClick={onBack}>
+                <ArrowLeft size={16} aria-hidden="true" />
+                {backLabel}
+              </button>
+            }
+          />
+
           {(error || success) && (
             <div className="alert-stack">
               {error && (
@@ -455,8 +411,7 @@ export function AdminPanel({ onBack, backLabel = 'Volver al informe' }: AdminPan
             )}
           </div>
         </main>
-      </div>
-    </div>
+    </>
   );
 }
 

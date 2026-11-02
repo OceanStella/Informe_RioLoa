@@ -1,4 +1,4 @@
-import { Tractor, Truck, UsersRound } from 'lucide-react';
+import { Tractor, Truck } from 'lucide-react';
 import { getMachinery, getTrucks } from '../data/equipment';
 import { useConfig } from '../context/ConfigContext';
 import { useReport } from '../context/ReportContext';
@@ -58,12 +58,9 @@ export function ActiveRosterSection({ errors }: ActiveRosterSectionProps) {
   return (
     <section className="report-section" id="sec-roster" aria-labelledby="sec-roster-title">
       <SectionHeader
-        step={2}
-        icon={UsersRound}
-        tone="aqua"
         title="Dotación activa"
         titleId="sec-roster-title"
-        description="Selecciona y completa aquí, una sola vez, los equipos utilizados durante el turno. Las actividades reutilizan estos datos automáticamente."
+        description="Completa aquí cada equipo una sola vez. Las actividades reutilizan estos datos."
       />
       <div className="panel">
         <div className="equipment-picker">

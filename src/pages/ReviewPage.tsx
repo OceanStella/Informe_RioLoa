@@ -1,11 +1,10 @@
-import { Check, CircleAlert, CircleCheck, ClipboardCheck, Eye, FileText, X } from 'lucide-react';
+import { Check, CircleAlert, CircleCheck, Eye, FileText, X } from 'lucide-react';
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { invalidFieldClass } from '../components/fieldUtils';
-import { AppShell } from '../components/ui/AppShell';
 import { ReportStatusChip } from '../components/ui/ReportStatusChip';
-import { SectionHeader } from '../components/ui/SectionHeader';
-import { TopBar } from '../components/ui/TopBar';
+import { PageHead } from '../components/ui/PageHead';
+import { ReviewSkeleton } from '../components/ui/Skeletons';
 import { ValidationMessage } from '../components/ValidationMessage';
 import type { ReportDecision, ReviewDetails } from '../types/reports';
 import { formatShortDate } from '../utils/dates';
@@ -301,19 +300,11 @@ export function ReviewPage() {
   const decidedMessage = review?.decidedMessage ?? null;
 
   return (
-    <AppShell>
-      <div className="topbar-sticky">
-        <TopBar eyebrow="Operaciones · Área de Pozas" title="Revisión del informe" />
-      </div>
-
+    <>
       <main className="app-main">
-        <section className="report-section" aria-labelledby="review-section-title">
-          <SectionHeader
-            icon={ClipboardCheck}
-            tone="teal"
-            title="Informe Diario de Operaciones"
-            titleId="review-section-title"
-          />
+        <PageHead title="Revisión del informe" />
+
+        <section className="report-section">
 
           {blockedMessage && (
             <div className="global-alert" role="alert">
@@ -354,7 +345,7 @@ export function ReviewPage() {
             <ReviewEmailForm onSubmit={(email) => void loadReview(email)} error={emailError} />
           )}
 
-          {!review && !blockedMessage && !emailRequired && <p className="page-note">Cargando…</p>}
+          {!review && !blockedMessage && !emailRequired && <ReviewSkeleton />}
         </section>
       </main>
 
@@ -368,6 +359,6 @@ export function ReviewPage() {
           error={decisionError ?? previewError}
         />
       )}
-    </AppShell>
+    </>
   );
 }

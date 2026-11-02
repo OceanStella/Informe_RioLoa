@@ -71,6 +71,7 @@ export function AdminPasswordModal({ open, onClose, onSuccess }: AdminPasswordMo
             <label className="field-label" htmlFor="admin-password">Contraseña</label>
             <input
               id="admin-password"
+              autoFocus
               type="password"
               autoComplete="current-password"
               className={invalidFieldClass(Boolean(error))}

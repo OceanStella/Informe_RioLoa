@@ -4,11 +4,13 @@ import { useConfig } from '../context/ConfigContext';
 import { useReport } from '../context/ReportContext';
 import type { Activity } from '../types/report';
 import { getActivityEquipmentCodes, resolveActivityArea, resolveActivityType } from '../utils/calculations';
+import { pluralize } from '../utils/text';
 import type { FlatValidationErrors } from '../utils/validation';
 import { EquipmentSelector } from './EquipmentSelector';
 import { invalidFieldClass } from './fieldUtils';
 import { PhotoInput } from './PhotoInput';
 import { CollapseToggle } from './ui/CollapseToggle';
+import { Select } from './ui/Select';
 import { ValidationMessage } from './ValidationMessage';
 import { WatermasterSection } from './WatermasterSection';
 
@@ -40,9 +42,6 @@ export function ActivityCard({ activity, index, errors, canDelete }: ActivityCar
   const header = (
     <header className="activity-header">
       <div className="activity-heading">
-        <span className="activity-index" aria-hidden="true">
-          {String(visualNumber).padStart(2, '0')}
-        </span>
         <div>
           <h3 className="activity-title">
             Actividad {visualNumber}
@@ -62,7 +61,7 @@ export function ActivityCard({ activity, index, errors, canDelete }: ActivityCar
               <span className="activity-meta-empty">Sin tipo</span>
             )}
             <span className="activity-meta-sep" aria-hidden="true">·</span>
-            <span className="num">{equipmentCount} equipos seleccionados</span>
+            <span className="num">{pluralize(equipmentCount, 'equipo seleccionado', 'equipos seleccionados')}</span>
           </p>
         </div>
       </div>
@@ -107,23 +106,15 @@ export function ActivityCard({ activity, index, errors, canDelete }: ActivityCar
           <div className="form-grid">
             <div className="form-field" data-field={`${prefix}.area`}>
               <label className="field-label" htmlFor={fieldId('area')}>Poza / Área</label>
-              <select
+              <Select
                 id={fieldId('area')}
-                className={invalidFieldClass(Boolean(errors[`${prefix}.area`]))}
+                invalid={Boolean(errors[`${prefix}.area`])}
                 value={activity.area}
-                onChange={(e) =>
-                  dispatch({
-                    type: 'UPDATE_ACTIVITY',
-                    activityId: activity.id,
-                    patch: { area: e.target.value },
-                  })
+                options={config.activityAreas.map((opt) => ({ value: opt.name, label: opt.name }))}
+                onChange={(area) =>
+                  dispatch({ type: 'UPDATE_ACTIVITY', activityId: activity.id, patch: { area } })
                 }
-              >
-                <option value="">Seleccionar...</option>
-                {config.activityAreas.map((opt) => (
-                  <option key={opt.id} value={opt.name}>{opt.name}</option>
-                ))}
-              </select>
+              />
               <ValidationMessage message={errors[`${prefix}.area`]} />
             </div>
 
@@ -153,23 +144,15 @@ export function ActivityCard({ activity, index, errors, canDelete }: ActivityCar
                 <input id={fieldId('type')} type="text" value="Draga Watermaster" readOnly className="readonly-input" />
               ) : (
                 <>
-                  <select
+                  <Select
                     id={fieldId('type')}
-                    className={invalidFieldClass(Boolean(errors[`${prefix}.type`]))}
+                    invalid={Boolean(errors[`${prefix}.type`])}
                     value={activity.type}
-                    onChange={(e) =>
-                      dispatch({
-                        type: 'UPDATE_ACTIVITY',
-                        activityId: activity.id,
-                        patch: { type: e.target.value },
-                      })
+                    options={ACTIVITY_TYPE_OPTIONS.map((opt) => ({ value: opt, label: opt }))}
+                    onChange={(type) =>
+                      dispatch({ type: 'UPDATE_ACTIVITY', activityId: activity.id, patch: { type } })
                     }
-                  >
-                    <option value="">Seleccionar...</option>
-                    {ACTIVITY_TYPE_OPTIONS.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
+                  />
                   <ValidationMessage message={errors[`${prefix}.type`]} />
                 </>
               )}

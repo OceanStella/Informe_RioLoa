@@ -15,6 +15,7 @@ import {
 import type { FlatValidationErrors } from '../utils/validation';
 import { ComputedField } from './ComputedField';
 import { invalidFieldClass } from './fieldUtils';
+import { Select } from './ui/Select';
 import { ValidationMessage } from './ValidationMessage';
 
 interface WatermasterSectionProps {
@@ -70,24 +71,20 @@ export function WatermasterSection({ activityId, errors }: WatermasterSectionPro
         </div>
         <div className="form-field" data-field={`${prefix}.depth`}>
           <label className="field-label" htmlFor={fieldId('depth')}>Profundidad de Triturado (m)</label>
-          <select
+          <Select
             id={fieldId('depth')}
-            className={invalidFieldClass(Boolean(errors[`${prefix}.depth`]))}
-            value={wm.depth ?? ''}
-            onChange={(e) =>
+            invalid={Boolean(errors[`${prefix}.depth`])}
+            value={wm.depth === null ? '' : String(wm.depth)}
+            options={WATERMASTER_DEPTH_OPTIONS.map((d) => ({ value: String(d), label: formatDepthLabel(d) }))}
+            onChange={(value) =>
               dispatch({
                 type: 'UPDATE_WATERMASTER',
                 activityId,
                 field: 'depth',
-                value: e.target.value === '' ? null : Number(e.target.value),
+                value: value === '' ? null : Number(value),
               })
             }
-          >
-            <option value="">Seleccionar...</option>
-            {WATERMASTER_DEPTH_OPTIONS.map((d) => (
-              <option key={d} value={d}>{formatDepthLabel(d)}</option>
-            ))}
-          </select>
+          />
           <ValidationMessage message={errors[`${prefix}.depth`]} />
         </div>
 

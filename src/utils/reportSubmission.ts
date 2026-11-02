@@ -3,8 +3,11 @@ import type { GuestProfile } from '../context/GuestProfileContext';
 import type { AppConfig } from '../types/config';
 import type { Activity, ReportData } from '../types/report';
 import { getWatermasterHourlyPerformance, resolveActivityArea, resolveActivityType } from './calculations';
+import { localIsoDate } from './dates';
 import { createPhotoFromFile } from './images';
 import { getReportFileName } from './pdf';
+import { serializeForm } from './reportDraft';
+import { carryOverShift } from './shiftCarryOver';
 
 /** The report is already stored; only the email failed, so a retry must not create it again. */
 export class ReportDeliveryError extends Error {
@@ -39,12 +42,6 @@ function buildEquipmentSummary(report: ReportData) {
   return [...equipment.values()];
 }
 
-/** Everything needed to rebuild the form later. Photos travel as files, never inside the snapshot. */
-function buildFormSnapshot(report: ReportData): string {
-  const excluded = new Set(['beforePhoto', 'afterPhoto', 'revisedFrom']);
-  return JSON.stringify(report, (key, value: unknown) => (excluded.has(key) ? undefined : value));
-}
-
 function appendFormPhotos(data: FormData, report: ReportData): void {
   for (const activity of report.activities) {
     if (activity.beforePhoto) data.append('photos', activity.beforePhoto.file, `${activity.id}.before`);
@@ -71,7 +68,7 @@ function buildSubmission(
     ccEmails,
     guestProfile,
     submissionId,
-    formSnapshot: buildFormSnapshot(report),
+    formSnapshot: serializeForm(report),
     revisedFromReportId: report.revisedFrom?.reportId ?? null,
     metrics: {
       activitiesCount: overview.activityCount,
@@ -162,6 +159,17 @@ async function restorePhotos(reportId: string, activity: Activity, photos: Repor
     restored[which === 'before' ? 'beforePhoto' : 'afterPhoto'] = createPhotoFromFile(file);
   }
   return restored;
+}
+
+/** Starts today's report from the latest one sent, so the shift only types what changed. */
+export async function loadReportFromLast(config: AppConfig): Promise<ReportData> {
+  const response = await fetch('/api/reports/latest-form', { credentials: 'include' });
+  const payload = (await response.json()) as { ok?: boolean; message?: string; reportDate: string; formSnapshot: string };
+  if (!response.ok || !payload.ok) throw new Error(payload.message || 'No fue posible cargar el último informe.');
+
+  const previous = JSON.parse(payload.formSnapshot) as ReportData;
+  const equipmentIds = config.equipment.map((item) => item.id);
+  return { ...carryOverShift(previous, payload.reportDate, equipmentIds), date: localIsoDate() };
 }
 
 /** Rebuilds the whole form from a rejected report, ready to correct and send as a new one. */

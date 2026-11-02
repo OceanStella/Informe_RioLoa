@@ -1102,3 +1102,17 @@ test('the whole flow only touches the informeOctavio namespace', async () => {
     'informeOctavioUsers',
   ]);
 });
+
+test('a new shift starts from the latest report that stands, never a rejected one', async () => {
+  const standing = await submitReport({ reportDate: '2026-10-20', formSnapshot: FORM_SNAPSHOT });
+  assert.equal(standing.status, 201);
+  const rejected = await submitReport({ reportDate: '2026-10-21', formSnapshot: FORM_SNAPSHOT });
+  await rejectWith(((await rejected.json()) as { reportId: string }).reportId, 'Corregir vueltas');
+
+  const response = await fetch(`${baseUrl}/api/reports/latest-form`);
+  assert.equal(response.status, 200);
+  const data = (await response.json()) as { reportDate: string; formSnapshot: string };
+  assert.equal(data.reportDate, '2026-10-20');
+  assert.equal(data.formSnapshot, FORM_SNAPSHOT);
+});
+

@@ -1,11 +1,10 @@
-import { CircleAlert, CircleCheck, Download, Eye, History, MessageSquare, Pencil, Plus, Send } from 'lucide-react';
+import { CircleAlert, CircleCheck, Download, Eye, MessageSquare, Pencil, Plus, Send } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CommentModal, EditRejectedModal, ResendReportModal } from '../components/HistoryModals';
-import { AppShell } from '../components/ui/AppShell';
 import { ReportStatusChip } from '../components/ui/ReportStatusChip';
-import { SectionHeader } from '../components/ui/SectionHeader';
-import { TopBar } from '../components/ui/TopBar';
+import { PageHead } from '../components/ui/PageHead';
+import { HistorySkeleton } from '../components/ui/Skeletons';
 import { useReport } from '../context/ReportContext';
 import type { ReportListItem } from '../types/reports';
 import { formatMetric } from '../utils/calculations';
@@ -185,29 +184,11 @@ export function HistoryPage() {
   };
 
   return (
-    <AppShell>
-      <div className="topbar-sticky">
-        <TopBar
-          eyebrow="Operaciones · Área de Pozas"
-          title="Historial de informes"
-          actions={
-            <Link to="/report" className="btn btn-primary topbar-generate">
-              <Send size={15} aria-hidden="true" />
-              <span>Generar informe</span>
-            </Link>
-          }
-        />
-      </div>
-
+    <>
       <main className="app-main">
-        <section className="report-section" aria-labelledby="history-title">
-          <SectionHeader
-            icon={History}
-            tone="teal"
-            title="Informes generados"
-            titleId="history-title"
-            description="Cada informe conserva el PDF original enviado al supervisor."
-          />
+        <PageHead title="Historial de informes" />
+
+        <section className="report-section">
 
           {error && (
             <div className="global-alert" role="alert">
@@ -229,7 +210,7 @@ export function HistoryPage() {
             </div>
           ) : (
             reports.length > 0 && (
-              <div className="panel panel-flush">
+              <div className="panel panel-flush history-panel">
                 <HistoryTable reports={reports} {...handlers} />
                 <HistoryCards reports={reports} {...handlers} />
                 {nextCursor && (
@@ -249,7 +230,7 @@ export function HistoryPage() {
             )
           )}
 
-          {loading && reports.length === 0 && <p className="page-note">Cargando…</p>}
+          {loading && reports.length === 0 && <HistorySkeleton />}
         </section>
       </main>
 
@@ -268,6 +249,6 @@ export function HistoryPage() {
       {editing && (
         <EditRejectedModal report={editing} onCancel={() => setEditing(null)} onConfirm={() => startEditing(editing)} />
       )}
-    </AppShell>
+    </>
   );
 }

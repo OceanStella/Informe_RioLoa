@@ -119,11 +119,3 @@ export function buildReportOverview(
     },
   };
 }
-
-export function formatReportDate(value: string): string {
-  const [y, m, d] = value.split('-').map(Number);
-  if (!y || !m || !d) return 'Sin fecha';
-  const date = new Date(y, m - 1, d);
-  const text = date.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}

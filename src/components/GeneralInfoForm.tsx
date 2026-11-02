@@ -1,8 +1,8 @@
-import { ClipboardList } from 'lucide-react';
 import { useConfig } from '../context/ConfigContext';
 import { useReport } from '../context/ReportContext';
 import { invalidFieldClass } from './fieldUtils';
 import { SectionHeader } from './ui/SectionHeader';
+import { Select } from './ui/Select';
 import { ValidationMessage } from './ValidationMessage';
 import type { FlatValidationErrors } from '../utils/validation';
 
@@ -16,14 +16,7 @@ export function GeneralInfoForm({ errors }: GeneralInfoFormProps) {
 
   return (
     <section className="report-section" id="sec-general" aria-labelledby="sec-general-title">
-      <SectionHeader
-        step={1}
-        icon={ClipboardList}
-        tone="cyan"
-        title="Antecedentes generales"
-        titleId="sec-general-title"
-        description="Datos de identificación del turno y responsables."
-      />
+      <SectionHeader title="Antecedentes generales" titleId="sec-general-title" />
       <div className="panel">
         <div className="form-grid cols-4">
           <div className="form-field" data-field="general.date">
@@ -56,17 +49,13 @@ export function GeneralInfoForm({ errors }: GeneralInfoFormProps) {
             <label className="field-label" htmlFor="report-area">
               <span>Área<span className="required">*</span></span>
             </label>
-            <select
+            <Select
               id="report-area"
-              className={invalidFieldClass(Boolean(errors['general.area']))}
+              invalid={Boolean(errors['general.area'])}
               value={report.area}
-              onChange={(e) => dispatch({ type: 'UPDATE_GENERAL_INFO', field: 'area', value: e.target.value })}
-            >
-              <option value="">Seleccionar...</option>
-              {config.generalAreas.map((opt) => (
-                <option key={opt.id} value={opt.name}>{opt.name}</option>
-              ))}
-            </select>
+              options={config.generalAreas.map((opt) => ({ value: opt.name, label: opt.name }))}
+              onChange={(value) => dispatch({ type: 'UPDATE_GENERAL_INFO', field: 'area', value })}
+            />
             <ValidationMessage message={errors['general.area']} />
           </div>
           <div className="form-field" data-field="general.apr">

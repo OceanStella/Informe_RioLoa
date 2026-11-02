@@ -95,9 +95,10 @@
   /* Layout */
   --sidebar-w: 292px;
   --topbar-h: 64px;
+  /* Side margin of the bar and of every page, so they share their edges. */
+  --frame-x: var(--space-8);
   --control-h: 40px;
   --control-h-sm: 32px;
-  --content-max: 1120px;
 
   /* Motion */
   --dur-fast: 120ms;

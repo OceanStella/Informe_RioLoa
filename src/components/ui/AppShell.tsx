@@ -1,54 +1,31 @@
-import { Settings } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useReport } from '../../context/ReportContext';
+import { Suspense, useMemo, useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useShell } from '../../context/ShellContext';
 import { AdminPanel } from '../AdminPanel';
-import { formatReportDate } from '../reportOverview';
 import { AppSidebar } from './AppSidebar';
+import { NAV_ITEMS } from './navItems';
+import type { ShellSlots } from './shellSlots';
+import { PageSkeleton } from './Skeletons';
+import { TopBar } from './TopBar';
 
-const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/history', label: 'Historial' },
-  { to: '/report', label: 'Generar informe' },
-];
-
-function TurnCard() {
-  const { report } = useReport();
-  return (
-    <div className="sidebar-card turn-card">
-      <p className="sidebar-label">Turno</p>
-      <p className="turn-date">{formatReportDate(report.date)}</p>
-      <dl className="turn-meta">
-        <div>
-          <dt>Área</dt>
-          <dd>{report.area || '—'}</dd>
-        </div>
-        <div>
-          <dt>Supervisor</dt>
-          <dd>{report.supervisor.trim() || '—'}</dd>
-        </div>
-        <div>
-          <dt>APR</dt>
-          <dd>{report.apr.trim() || '—'}</dd>
-        </div>
-      </dl>
-    </div>
-  );
-}
-
-function AppNav() {
+/** The top bar holds these links from 861px up; on a phone they live in the drawer. */
+function DrawerNav() {
+  const { adminOpen, closeAdmin } = useShell();
   const { pathname } = useLocation();
 
   return (
-    <nav className="step-nav" aria-label="Navegación principal">
-      <p className="sidebar-label">Navegación</p>
+    <nav className="step-nav drawer-nav" aria-label="Navegación principal">
       <ol className="step-list is-plain">
         {NAV_ITEMS.map((item) => {
-          const active = pathname === item.to;
+          const active = !adminOpen && pathname === item.to;
           return (
             <li key={item.to} className={`step-item is-idle${active ? ' is-active' : ''}`}>
-              <Link to={item.to} className="step-link" aria-current={active ? 'page' : undefined}>
+              <Link
+                to={item.to}
+                className="step-link"
+                aria-current={active ? 'page' : undefined}
+                onClick={closeAdmin}
+              >
                 <span className="step-marker" aria-hidden="true" />
                 <span className="step-text">
                   <span className="step-label">{item.label}</span>
@@ -62,39 +39,39 @@ function AppNav() {
   );
 }
 
-interface AppShellProps {
-  /** Rendered between the turn card and the navigation; only the report uses it. */
-  sidebarCards?: ReactNode;
-  /** Rendered under the navigation; only the report uses it. */
-  sidebarSteps?: ReactNode;
-  children: ReactNode;
-}
-
-export function AppShell({ sidebarCards, sidebarSteps, children }: AppShellProps) {
-  const { adminOpen, closeAdmin, openAdmin } = useShell();
+/** The layout route: it stays mounted across navigation, only the page inside it changes. */
+export function AppShell() {
+  const { adminOpen, closeAdmin } = useShell();
   const { pathname } = useLocation();
+  const [panel, setPanel] = useState<HTMLDivElement | null>(null);
+  const [progress, setProgress] = useState<HTMLDivElement | null>(null);
+  const slots = useMemo<ShellSlots>(() => ({ panel, progress }), [panel, progress]);
 
-  if (adminOpen) {
-    return <AdminPanel onBack={closeAdmin} backLabel={pathname === '/report' ? 'Volver al informe' : 'Volver'} />;
-  }
+  // The supervisor arrives from the email: the app around the review is not theirs.
+  const navigation = !pathname.startsWith('/review/');
+  const hasPanel = pathname === '/report' && !adminOpen;
 
   return (
-    <div className="app-shell has-sidebar">
-      <AppSidebar
-        context="Área de Pozas · SQM"
-        footer={
-          <button type="button" className="sidebar-admin" onClick={() => void openAdmin()}>
-            <Settings size={16} aria-hidden="true" />
-            Administrar parámetros
-          </button>
-        }
-      >
-        <TurnCard />
-        {sidebarCards}
-        <AppNav />
-        {sidebarSteps}
-      </AppSidebar>
-      <div className="workspace">{children}</div>
+    <div className={`app-shell${hasPanel ? ' has-sidebar' : ''}`}>
+      {navigation && (
+        <AppSidebar>
+          <DrawerNav />
+          <div className="sidebar-slot" ref={setPanel} />
+        </AppSidebar>
+      )}
+      <div className="topbar-sticky">
+        <TopBar navigation={navigation} />
+        <div ref={setProgress} />
+      </div>
+      <div className="workspace">
+        {adminOpen ? (
+          <AdminPanel onBack={closeAdmin} backLabel={pathname === '/report' ? 'Volver al informe' : 'Volver'} />
+        ) : (
+          <Suspense fallback={<PageSkeleton />}>
+            <Outlet context={slots} />
+          </Suspense>
+        )}
+      </div>
     </div>
   );
 }

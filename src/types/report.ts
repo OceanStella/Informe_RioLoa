@@ -76,6 +76,8 @@ export interface ReportData {
   roster: ActiveRosterAssignment[];
   activities: Activity[];
   revisedFrom?: ReportRevisionSource;
+  /** Date of the report this one was started from, until it is sent. */
+  carriedFrom?: string;
 }
 
 export type OperationalField = keyof OperationalData;

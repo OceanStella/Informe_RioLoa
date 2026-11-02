@@ -17,7 +17,7 @@ Cualquier vista, dashboard, tabla, modal, historial, login o estado nuevo debe *
 
 1. No inventar paletas, radii, sombras ni tipografía.
 2. Reutilizar `src/styles/tokens.css`, clases de `src/App.css` y componentes de `src/components/ui/`.
-3. No introducir Tailwind, CSS-in-JS, shadcn, Material, ni librerías de charts con tema por defecto.
+3. No introducir Tailwind, CSS-in-JS, shadcn, Material, ni librerías de charts con tema por defecto. Se permite `@base-ui/react` (headless, sin estilos propios): hoy lo usa `UserMenu`.
 4. No “modernizar” ni “simplificar” el shell.
 5. El PDF (`DailyReportPdf`, skill `pdf-report-aesthetics`) usa teal `#176D78`. **Ese valor no se usa en la web.** Web = `#195A64` / `#0091C7`.
 
@@ -30,6 +30,53 @@ Cualquier vista, dashboard, tabla, modal, historial, login o estado nuevo debe *
 | [references/mobile-390.png](references/mobile-390.png) | Título wrapping, pills icon-only, KPIs apilados internamente |
 | [references/admin.png](references/admin.png) | Admin: tabs, tabla, sidebar `is-plain` |
 | [references/modal.png](references/modal.png) | Overlay + `SendReportModal` |
+
+Las capturas son anteriores al cambio de shell del 2026-11-01. Para el shell mandan la sección siguiente y el código.
+
+## Cambios del 2026-11-01: shell simplificado
+
+Pedido del titular. **Prevalece sobre §1.2, §8, §9, §10, §11, §12, §15, §20, §21, §22 y §26.1** donde se contradigan.
+
+**Regla de la pantalla de informe:** solo lo necesario para generar el informe. Sin KPIs, sin fecha ni estado en la barra superior, sin un segundo "Generar informe": la acción vive en el panel final.
+
+| Pieza | Ahora |
+| --- | --- |
+| Barra superior (`TopBar`) | Blanca y sólida, **idéntica en toda la app**: nada en ella depende de la ruta. Links centrados con la rejilla `1fr auto 1fr`. Logo y cuenta van en el margen `--frame-x`, el mismo de `.app-main`. Desde 1200 px ese margen centra el logo sobre el panel. Sin eyebrow ni título |
+| Layout | `AppShell` es la ruta padre de `App.tsx` y no se desmonta al navegar. Las páginas solo rinden su `<main>`. El panel y la barra de avance del informe llegan por portal, con `useShellSlots` |
+| Navegación | Dashboard, Historial y Generar informe, con subrayado teal de 2 px en la página activa. Un solo origen: `src/components/ui/navItems.ts` |
+| Título de página | `PageHead` en el contenido: h1 de 28/700 (22 en ≤640) |
+| Panel lateral | **Solo en `/report`**, bajo la barra: Avance y Secciones. Sin Turno, sin navegación, sin Admin. Dashboard, Historial y Admin van a ancho completo |
+| Administrar parámetros | En el menú de cuenta (`UserMenu`). Es configuración, no una tarea del turno |
+| `/review` | Sin navegación ni panel: el supervisor llega por correo y esa app no es suya |
+| Secciones del informe | Título y, si aporta, una línea. Sin eyebrow "Paso N de 5", sin pozo de icono, sin índice "01" |
+| Generar | Un solo "Agregar Actividad", al final de la lista. Panel oscuro sin eyebrow |
+
+**Responsive:** desde 861 px los links van en la barra. En ≤860 pasan al cajón con el botón de menú. Entre 861 y 1199, `/report` abre sus secciones en ese cajón y conserva la barra de avance de 3 px, que en ≥1200 se oculta porque el panel ya muestra el avance.
+
+**Dashboard:** primero la tarea y después los datos.
+
+- Arriba, *Crear informe* (`src/data/reportTypes.ts`, una entrada por tipo) y *Últimos informes*, con su estado y lo que requiere acción.
+- Debajo, gráficos con pesos desiguales en rejilla de 3 columnas: `ChartPanel hero` ocupa 2. Un solo color de serie, `--rio-teal`; el color de estado solo en `StatusBreakdown`.
+- **No hay tarjetas de KPI** (`KpiStrip` se eliminó): cada cifra vive en la cabecera del gráfico que la explica. No volver a una rejilla de tarjetas iguales.
+- Barras para cantidades por día: una línea con un solo punto no comunica nada.
+
+**Carga:** `src/components/ui/Skeletons.tsx`, con la forma real del contenido para que nada salte. Prevalece sobre §7 y §26.7. Los botones que esperan siguen cambiando su texto.
+
+**Controles:** lenguaje tipo shadcn, con los tokens de esta guía.
+
+- **Botones:** relleno sólido, nunca gradiente, porque un gradiente no se puede animar y el hover parpadea (`background-image` desaparece de golpe y el color sube desde transparente). Sin `transform` en `:active`: mover el botón lo saca de debajo del cursor. Prevalece sobre §3.1 y §16.
+- **Dropdowns:** `src/components/ui/Select.tsx`, sobre Base UI. No usar `<select>` nativo. El foco tras un error lo busca `scrollToField` en `button.select-trigger`.
+- **Checkbox:** sigue siendo el `<input>` nativo, con `appearance: none`. Prevalece sobre §14.2.
+- **Inputs numéricos:** sin flechas. El calendario de `type="date"` sigue siendo el nativo del navegador.
+
+**Móvil (≤640):** la lista de equipos va en 2 columnas y sus códigos pasan a 2 líneas, nunca con puntos suspensivos. Inicial y final van lado a lado, con el calculado debajo. Las pestañas de Admin van en 1 columna. Historial no lleva panel alrededor de sus tarjetas.
+
+**Reglas heredadas de OceanCar**
+
+- Todo lo clicable muestra la mano: regla global en `src/App.css`. Se audita el `cursor` calculado.
+- En pantallas táctiles los campos escriben a 16 px, porque iOS hace zoom bajo ese tamaño y no lo deshace.
+- Se revisa a 390, ~1400 y 1920 px. Etiquetas y links no se parten; los iconos van centrados.
+- Evitar lo que delata una interfaz genérica: eyebrows, tarjetas iguales de icono + título + texto, métricas decorativas e información repetida.
 
 ---
 
